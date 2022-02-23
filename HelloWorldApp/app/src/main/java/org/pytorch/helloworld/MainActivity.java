@@ -20,10 +20,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
+  private static final String TAG = "oua_" + MainActivity.class.getSimpleName();
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -36,9 +38,12 @@ public class MainActivity extends AppCompatActivity {
       // creating bitmap from packaged into app android asset 'image.jpg',
       // app/src/main/assets/image.jpg
       bitmap = BitmapFactory.decodeStream(getAssets().open("image.jpg"));
+
+      Log.i(TAG, String.format("The shape of bitmap (wxh): %dx%d", bitmap.getWidth(), bitmap.getHeight()));
+
       // loading serialized torchscript module from packaged into app android asset model.pt,
       // app/src/model/assets/model.pt
-      module = LiteModuleLoader.load(assetFilePath(this, "model.pt"));
+      module = LiteModuleLoader.load(assetFilePath(this, "mobilenet_v2.pt"));
     } catch (IOException e) {
       Log.e("PytorchHelloWorld", "Error reading assets", e);
       finish();
@@ -51,6 +56,8 @@ public class MainActivity extends AppCompatActivity {
     // preparing input tensor
     final Tensor inputTensor = TensorImageUtils.bitmapToFloat32Tensor(bitmap,
         TensorImageUtils.TORCHVISION_NORM_MEAN_RGB, TensorImageUtils.TORCHVISION_NORM_STD_RGB, MemoryFormat.CHANNELS_LAST);
+
+    Log.i(TAG, "input_shape=" + Arrays.toString(inputTensor.shape()));
 
     // running the model
     final Tensor outputTensor = module.forward(IValue.from(inputTensor)).toTensor();
