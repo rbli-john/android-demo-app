@@ -37,13 +37,17 @@ public class MainActivity extends AppCompatActivity {
     try {
       // creating bitmap from packaged into app android asset 'image.jpg',
       // app/src/main/assets/image.jpg
-      bitmap = BitmapFactory.decodeStream(getAssets().open("image.jpg"));
+      Bitmap orgBitmap = BitmapFactory.decodeStream(getAssets().open("image.jpg"));
 
-      Log.i(TAG, String.format("The shape of bitmap (wxh): %dx%d", bitmap.getWidth(), bitmap.getHeight()));
+      Log.i(TAG, String.format("The shape of orginal bitmap (wxh): %dx%d", orgBitmap.getWidth(), orgBitmap.getHeight()));
+
+      bitmap = Bitmap.createScaledBitmap(orgBitmap, 256, 256, true);
+
+      Log.i(TAG, String.format("The shape of resized bitmap (wxh): %dx%d", bitmap.getWidth(), bitmap.getHeight()));
 
       // loading serialized torchscript module from packaged into app android asset model.pt,
       // app/src/model/assets/model.pt
-      module = LiteModuleLoader.load(assetFilePath(this, "mobilenet_v2.pt"));
+      module = LiteModuleLoader.load(assetFilePath(this, "StyleGAN_converter_ReLU_01042022.ptl"));
     } catch (IOException e) {
       Log.e("PytorchHelloWorld", "Error reading assets", e);
       finish();
@@ -63,23 +67,25 @@ public class MainActivity extends AppCompatActivity {
     final Tensor outputTensor = module.forward(IValue.from(inputTensor)).toTensor();
 
     // getting tensor content as java array of floats
-    final float[] scores = outputTensor.getDataAsFloatArray();
+    final float[] output = outputTensor.getDataAsFloatArray();
+    Log.i(TAG, "output: " + Arrays.toString(output));
 
     // searching for the index with maximum score
-    float maxScore = -Float.MAX_VALUE;
-    int maxScoreIdx = -1;
-    for (int i = 0; i < scores.length; i++) {
-      if (scores[i] > maxScore) {
-        maxScore = scores[i];
-        maxScoreIdx = i;
-      }
-    }
-
-    String className = ImageNetClasses.IMAGENET_CLASSES[maxScoreIdx];
+//    float maxScore = -Float.MAX_VALUE;
+//    int maxScoreIdx = -1;
+//    for (int i = 0; i < scores.length; i++) {
+//      if (scores[i] > maxScore) {
+//        maxScore = scores[i];
+//        maxScoreIdx = i;
+//      }
+//    }
+//
+//    String className = ImageNetClasses.IMAGENET_CLASSES[maxScoreIdx];
 
     // showing className on UI
     TextView textView = findViewById(R.id.text);
-    textView.setText(className);
+//    textView.setText(className);
+      textView.setText("Done");
   }
 
   /**
