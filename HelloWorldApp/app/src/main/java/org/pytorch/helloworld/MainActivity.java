@@ -41,13 +41,15 @@ public class MainActivity extends AppCompatActivity {
 
       Log.i(TAG, String.format("The shape of orginal bitmap (wxh): %dx%d", orgBitmap.getWidth(), orgBitmap.getHeight()));
 
-      bitmap = Bitmap.createScaledBitmap(orgBitmap, 256, 256, true);
+      final int inputWidth = 256;
+      final int inputHeight = 256;
+      bitmap = Bitmap.createScaledBitmap(orgBitmap, inputWidth, inputHeight, true);
 
       Log.i(TAG, String.format("The shape of resized bitmap (wxh): %dx%d", bitmap.getWidth(), bitmap.getHeight()));
 
       // loading serialized torchscript module from packaged into app android asset model.pt,
       // app/src/model/assets/model.pt
-      module = LiteModuleLoader.load(assetFilePath(this, "StyleGAN_converter_ReLU_01042022.ptl"));
+      module = LiteModuleLoader.load(assetFilePath(this, "StyleGAN_converter_LeakyReLU_02222022.ptl"));
     } catch (IOException e) {
       Log.e("PytorchHelloWorld", "Error reading assets", e);
       finish();
@@ -65,6 +67,8 @@ public class MainActivity extends AppCompatActivity {
 
     // running the model
     final Tensor outputTensor = module.forward(IValue.from(inputTensor)).toTensor();
+
+    Log.i(TAG, "inference done");
 
     // getting tensor content as java array of floats
     final float[] output = outputTensor.getDataAsFloatArray();
